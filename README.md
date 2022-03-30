@@ -11,7 +11,7 @@ Clone / Download this repo and use the following commands:
 <pre>$ pip install -r .\requirements.txt && python .\main.py</pre>
 
 #### MacOS / Linux
-<pew>$ pip3 install -r ./requirements.txt && python3 ./main.py</pre>
+<pre>$ pip3 install -r ./requirements.txt && python3 ./main.py</pre>
 
 
 ## Configuration
