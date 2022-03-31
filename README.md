@@ -1,5 +1,5 @@
 # AR_Keyboard
-A virtual keyboard, needing nothing but your hands to type and a camera to type!
+A virtual keyboard, needing nothing but your hands and a camera to type!
 
 
 ## Setup
