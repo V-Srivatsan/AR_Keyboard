@@ -17,7 +17,7 @@ POINTS = [
     # MP_HANDS.HandLandmark.THUMB_TIP,
     MP_HANDS.HandLandmark.INDEX_FINGER_TIP,
     MP_HANDS.HandLandmark.MIDDLE_FINGER_TIP,
-    # MP_HANDS.HandLandmark.RING_FINGER_TIP,
+    MP_HANDS.HandLandmark.RING_FINGER_TIP,
     # MP_HANDS.HandLandmark.PINKY_TIP,
 ]
 
@@ -56,7 +56,6 @@ def _getKey(coords):
             if coords[0] >= KEY_END:
                 if (key in SIZES and coords[0] <= KEY_END + (SIZES[key] * KEY_SIDE)) \
                     or coords[0] <= KEY_END + KEY_SIDE:
-                        print(row, key)
                         return key
 
                 if key in SIZES: KEY_END += (SIZES[key] * KEY_SIDE)
@@ -66,7 +65,7 @@ def _getKey(coords):
                     
 
 
-def ProcessImage(image):
+def ProcessImage(image, calc):
     pressed = []
 
     image.flags.writeable = False
@@ -89,23 +88,24 @@ def ProcessImage(image):
                 MP_HANDS.HAND_CONNECTIONS,
                 MP_DRAWING_STYLES.get_default_hand_landmarks_style(),
                 MP_DRAWING_STYLES.get_default_hand_connections_style())
+            
+            if (calc):
+                for point in POINTS:
+                    landmark = hand_landmarks.landmark[point]
+                    x, y, z = float(landmark.x * WIDTH), float(landmark.y * HEIGHT), landmark.z
 
-            for point in POINTS:
-                landmark = hand_landmarks.landmark[point]
-                x, y, z = float(landmark.x * WIDTH), float(landmark.y * HEIGHT), landmark.z
-
-                if z <= THRESHOLDS[point]:
-                    key = _getKey((x, y))
-                    if key:
-                        if key not in EXCLUDED and key in TIMEOUT and TIMEOUT[key] != 0:
-                            TIMEOUT[key] -= 1
-                        
-                        else:
-                            if key in ALIASES:
-                                pressed.append(ALIASES[key])
+                    if z <= THRESHOLDS[point]:
+                        key = _getKey((x, y))
+                        if key:
+                            if key not in EXCLUDED and key in TIMEOUT and TIMEOUT[key] != 0:
+                                TIMEOUT[key] -= 1
+                            
                             else:
-                                pressed.append(key.lower())
-                            TIMEOUT[key] = TIMEOUT_FRAMES
+                                if key in ALIASES:
+                                    pressed.append(ALIASES[key])
+                                else:
+                                    pressed.append(key.lower())
+                                TIMEOUT[key] = TIMEOUT_FRAMES
 
     return DrawKeyboard(frame), pressed
     
