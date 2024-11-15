@@ -66,7 +66,7 @@ def _getKey(coords):
 
 
 def ProcessImage(image, calc):
-    pressed = []
+    pressed = set()
 
     image.flags.writeable = False
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -78,7 +78,7 @@ def ProcessImage(image, calc):
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
     frame = numpy.zeros((HEIGHT, WIDTH, 3), numpy.uint8)
-    frame[:, : WIDTH] = (45, 45, 45)
+    frame[:, : WIDTH] = (3, 3, 3)
 
     if results.multi_hand_landmarks:
         for hand_landmarks in results.multi_hand_landmarks:
@@ -97,15 +97,16 @@ def ProcessImage(image, calc):
                     if z <= THRESHOLDS[point]:
                         key = _getKey((x, y))
                         if key:
-                            if key not in EXCLUDED and key in TIMEOUT and TIMEOUT[key] != 0:
-                                TIMEOUT[key] -= 1
+                            if key not in EXCLUDED and key in TIMEOUT and TIMEOUT[key] != 0: continue
                             
                             else:
                                 if key in ALIASES:
-                                    pressed.append(ALIASES[key])
+                                    pressed.add(ALIASES[key])
                                 else:
-                                    pressed.append(key.lower())
+                                    pressed.add(key.lower())
                                 TIMEOUT[key] = TIMEOUT_FRAMES
 
-    return DrawKeyboard(frame), pressed
+    for key in TIMEOUT: TIMEOUT[key] = max(TIMEOUT[key]-1, 0)
+
+    return DrawKeyboard(frame, TIMEOUT), pressed
     

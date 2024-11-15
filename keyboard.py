@@ -29,18 +29,28 @@ ALIASES = {
     'Caps': 'capslock',
 }
 
-def _drawKey(image, text, point1, point2: tuple[int, int]):
-    return cv2.rectangle(
-        cv2.putText(
-            image, text, (point1[0] + 7, point1[1] + 15),
-            cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255), 1,
-            cv2.LINE_AA,
-            False
+def _drawKey(image, text, point1, point2: tuple[int, int], pressed: bool = False):
+    return cv2.putText(
+        cv2.rectangle(
+            image, point1, point2, 
+            (128, 128, 128), 1 if not pressed else -1
+        ), text, 
+        org=(
+            point1[0] + max(20, 4*len(text)), 
+            ((point1[1]+point2[1])>>1) + 10
         ),
-        point1, point2, (255, 255, 255), 1
+        fontFace=cv2.FONT_HERSHEY_PLAIN, 
+        fontScale=max(1.5, 4 - (len(text)/3)), 
+        color=(255, 255, 255), 
+        thickness=2,
+        lineType=cv2.LINE_AA,
+        bottomLeftOrigin=False
     )
 
-def DrawKeyboard(image):
+
+
+
+def DrawKeyboard(image, pressed: dict[str, int]):
 
     X, Y = 0, 0
 
@@ -52,14 +62,17 @@ def DrawKeyboard(image):
     for row in ROWS:
         for key in row:
 
+            is_pressed = key in pressed and pressed[key]
+
             if not key in SIZES:
-                image = _drawKey(image, key, (X, Y), (X + side, Y + side))
+                image = _drawKey(image, key, (X, Y), (X + side, Y + side), is_pressed)
                 X += side
 
             else:
                 image = _drawKey(
                     image, key, (X, Y), 
-                    (X + int(side * SIZES[key]), Y + side)
+                    (X + int(side * SIZES[key]), Y + side),
+                    is_pressed
                 )
                 X += int(side * SIZES[key])
 
